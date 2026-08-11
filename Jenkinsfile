@@ -4,17 +4,11 @@ pipeline {
 
     environment {
 
-        // ==============================
-        // CHANGE THESE VALUES
-        // ==============================
-
         DOCKERHUB_USERNAME = 'afthab12'
         DOCKER_IMAGE = "${DOCKERHUB_USERNAME}/python-helloworld-app"
 
-        // Jenkins credential IDs
         DOCKER_CREDENTIALS = 'docker-cred'
 
-        // Kubernetes deployment
         K8S_DEPLOYMENT = 'python-helloworld-app'
         K8S_NAMESPACE = 'argocd-operator'
     }
@@ -29,37 +23,36 @@ pipeline {
     stages {
 
         stage('Checkout') {
-
             steps {
-
                 echo 'Checking out source code...'
-
                 checkout scm
             }
         }
 
         stage('Verify Files') {
-
             steps {
-
                 sh '''
                     echo "Checking project files..."
-
                     ls -la
+                    echo "Kubernetes files:"
+                    ls -la k8s/
+                    echo "Application files:"
+                    ls -la app/
 
                     echo "Python version:"
                     python3 --version || true
 
                     echo "Docker version:"
                     docker --version
+
+                    echo "Kubectl version:"
+                    /snap/bin/kubectl version --client
                 '''
             }
         }
 
         stage('Build Docker Image') {
-
             steps {
-
                 echo "Building Docker image..."
 
                 sh '''
@@ -72,7 +65,6 @@ pipeline {
         }
 
         stage('Login to DockerHub') {
-
             steps {
 
                 echo 'Logging in to DockerHub...'
@@ -95,7 +87,6 @@ pipeline {
         }
 
         stage('Push Docker Image') {
-
             steps {
 
                 echo 'Pushing image to DockerHub...'
@@ -108,30 +99,44 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes') {
-
             steps {
 
                 echo 'Deploying application to Kubernetes...'
 
                 sh '''
-                    kubectl apply -f deployment.yaml \
+                    echo "Checking Kubernetes connection..."
+
+                    /snap/bin/kubectl get nodes
+
+                    echo "Applying Deployment..."
+
+                    /snap/bin/kubectl apply \
+                    -f k8s/deployment.yaml \
                     -n ${K8S_NAMESPACE}
 
-                    kubectl apply -f service.yaml \
+                    echo "Applying Service..."
+
+                    /snap/bin/kubectl apply \
+                    -f k8s/service.yaml \
                     -n ${K8S_NAMESPACE}
 
-                    kubectl set image deployment/${K8S_DEPLOYMENT} \
+                    echo "Updating Docker image..."
+
+                    /snap/bin/kubectl set image \
+                    deployment/${K8S_DEPLOYMENT} \
                     python-helloworld-app=${DOCKER_IMAGE}:${BUILD_NUMBER} \
                     -n ${K8S_NAMESPACE}
 
-                    kubectl rollout status deployment/${K8S_DEPLOYMENT} \
+                    echo "Waiting for rollout..."
+
+                    /snap/bin/kubectl rollout status \
+                    deployment/${K8S_DEPLOYMENT} \
                     -n ${K8S_NAMESPACE}
                 '''
             }
         }
 
         stage('Verify Deployment') {
-
             steps {
 
                 sh '''
@@ -139,7 +144,7 @@ pipeline {
                     echo "Pods"
                     echo "=============================="
 
-                    kubectl get pods \
+                    /snap/bin/kubectl get pods \
                     -l app=python-helloworld-app \
                     -n ${K8S_NAMESPACE}
 
@@ -147,7 +152,7 @@ pipeline {
                     echo "Service"
                     echo "=============================="
 
-                    kubectl get service \
+                    /snap/bin/kubectl get service \
                     python-helloworld-service \
                     -n ${K8S_NAMESPACE}
 
@@ -155,7 +160,7 @@ pipeline {
                     echo "Deployment"
                     echo "=============================="
 
-                    kubectl get deployment \
+                    /snap/bin/kubectl get deployment \
                     python-helloworld-app \
                     -n ${K8S_NAMESPACE}
                 '''
@@ -166,7 +171,6 @@ pipeline {
     post {
 
         success {
-
             echo '''
             =====================================
             BUILD SUCCESSFUL
@@ -177,7 +181,6 @@ pipeline {
         }
 
         failure {
-
             echo '''
             =====================================
             BUILD FAILED
@@ -188,7 +191,6 @@ pipeline {
         }
 
         always {
-
             sh '''
                 docker logout || true
             '''
