@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: fastapi-container
-        image: akmal1076/fastapi-helloworld:2
+        image: afthab12/fastapi-helloworld:2
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
