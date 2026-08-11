@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE  = "akmal1076/fastapi-helloworld"
+        DOCKER_IMAGE  = "afthab12/fastapi-helloworld"
         GIT_REPO_NAME = "python-helloworld-app"
-        GIT_USER_NAME = "afthab12"
+        GIT_USER_NAME = "Afthabahammed"
     }
 
     options {
