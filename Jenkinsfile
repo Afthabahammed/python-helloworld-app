@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE  = "akmal1076/fastapi-helloworld"
         GIT_REPO_NAME = "python-helloworld-app"
-        GIT_USER_NAME = "Akmalm1076"
+        GIT_USER_NAME = "afthab12"
     }
 
     options {
@@ -57,7 +57,7 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                     sh '''
-                        git config user.email "akmalmansari1076@gmail.com"
+                        git config user.email "afthabvadassery@gmail.com"
                         git config user.name "${GIT_USER_NAME}"
 
                         sed -i "s|image: .*|image: ${DOCKER_IMAGE}:${BUILD_NUMBER}|g" k8s/deployment.yaml
