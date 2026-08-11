@@ -1,52 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: python-helloworld-app
+  name: fastapi-app
+  namespace: default
   labels:
-    app: python-helloworld-app
-
+    app: fastapi-app
 spec:
   replicas: 2
-
   selector:
     matchLabels:
-      app: python-helloworld-app
-
+      app: fastapi-app
   template:
     metadata:
       labels:
-        app: python-helloworld-app
-
+        app: fastapi-app
     spec:
       containers:
-        - name: python-helloworld-app
-          image: afthab12/python-helloworld-app:latest
-
-          ports:
-            - containerPort: 8000
-
-          env:
-            - name: PORT
-              value: "8000"
-
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "128Mi"
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
-
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 8000
-            initialDelaySeconds: 5
-            periodSeconds: 10
-
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 8000
-            initialDelaySeconds: 10
-            periodSeconds: 20
+      - name: fastapi-container
+        image: akmal1076/fastapi-helloworld:2
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
