@@ -12,7 +12,7 @@ pipeline {
         DOCKER_IMAGE = "${DOCKERHUB_USERNAME}/python-helloworld-app"
 
         // Jenkins credential IDs
-        DOCKER_CREDENTIALS = 'dockerhub-credentials'
+        DOCKER_CREDENTIALS = 'docker-cred'
 
         // Kubernetes deployment
         K8S_DEPLOYMENT = 'python-helloworld-app'
